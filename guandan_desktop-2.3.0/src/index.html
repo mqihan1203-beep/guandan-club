@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>掼蛋俱乐部</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="spade">♠</span><div><b>掼蛋 俱乐部</b><small>GUANDAN CLUB</small></div></div>
+      <nav>
+        <div class="difficulty-compact" title="人机难度">
+          <span>AI</span>
+          <select id="difficultySelect" aria-label="人机难度">
+            <option value="entry">入门</option>
+            <option value="novice">新手</option>
+            <option value="normal" selected>普通</option>
+            <option value="hard">困难</option>
+            <option value="pro">专业</option>
+            <option value="hell">地狱</option>
+          </select>
+        </div>
+        <button class="ghost icon-text" id="soundToggleBtn" title="出牌音效">🔊 音效</button>
+        <button class="ghost" id="openLobbyBtn">联机大厅</button>
+        <button class="ghost" id="rulesBtn">玩法说明</button>
+        <button class="ghost" id="newGameBtn">重新开局</button>
+      </nav>
+    </header>
+
+    <main class="game-layout">
+      <section class="table-card">
+        <div class="table-head"><span>THE CARD ROOM</span><strong id="roomBadge">单机 · AI 对战</strong></div>
+        <div class="felt" id="feltTable">
+          <div class="seat seat-top" data-seat="2"><div class="avatar">满</div><b id="name2">小满</b><small id="count2"></small></div>
+          <div class="seat seat-left" data-seat="3"><div class="avatar">周</div><b id="name3">老周</b><small id="count3"></small></div>
+          <div class="seat seat-right" data-seat="1"><div class="avatar">岚</div><b id="name1">阿岚</b><small id="count1"></small></div>
+
+          <div class="seat-play seat-play-top" id="seatPlay2"></div>
+          <div class="seat-play seat-play-left" id="seatPlay3"></div>
+          <div class="seat-play seat-play-right" id="seatPlay1"></div>
+          <div class="seat-play seat-play-bottom" id="seatPlay0"></div>
+
+          <div class="center-pile compact-center">
+            <div class="turn-tip" id="turnTip">好戏开场</div>
+            <div class="last-play" id="lastPlay">请你先出牌</div>
+          </div>
+          <div class="seat seat-bottom active" data-seat="0"><div class="avatar">你</div><b id="name0">你</b><small id="count0"></small></div>
+          <div id="playFx" class="play-fx" aria-hidden="true"></div>
+        </div>
+
+        <div class="hand-panel">
+          <div class="hand-toolbar">
+            <div class="hand-toolbar-left">
+              <span id="handCount">我的手牌 27 张</span>
+              <div class="sort-switch" aria-label="手牌整理">
+                <button id="arrangeHandBtn" class="mini-btn arrange-btn" title="自动识别同花顺、炸弹、钢板、三连对、三带二、顺子等牌型并集中摆放">一键摆牌</button>
+                <button id="manualSortBtn" class="mini-btn">手动排序</button>
+                <button id="autoSortBtn" class="mini-btn active">自动排序</button>
+              </div>
+            </div>
+            <span class="wild" id="wildLabel">♥2 逢人配</span>
+          </div>
+          <div class="hand two-row" id="hand"></div>
+          <div class="controls">
+            <button id="passBtn">不出 <kbd>P</kbd></button>
+            <button id="hintBtn">提示 <kbd>H</kbd></button>
+            <button id="autoBtn">托管</button>
+            <button id="clearBtn">取消选择</button>
+            <button class="primary" id="playBtn">出牌 <kbd>Enter</kbd></button>
+          </div>
+          <div class="status" id="statusText">点击手牌选择，你可以领出任意合法牌型</div>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="panel match-panel">
+          <h3>本场对局</h3>
+          <div class="score-row"><span>我方</span><b id="ourLevel">2</b><small id="ourTeamNames">你 & 小满</small></div>
+          <div class="score-row"><span>对方</span><b id="oppLevel">2</b><small id="oppTeamNames">阿岚 & 老周</small></div>
+          <div class="level-track">2 <span>从 2 打到 A</span> A</div>
+        </section>
+        <section class="panel activity-panel">
+          <div class="activity-head"><h3>牌局动态 · 聊天</h3><span id="connectionDot" class="connection-dot offline">单机</span></div>
+          <div id="activityFeed" class="activity-feed"></div>
+          <div class="chat-compose">
+            <input id="chatInput" maxlength="80" placeholder="打完牌聊两句…" />
+            <button id="sendChatBtn" class="primary">发送</button>
+          </div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div id="resultOverlay" class="result-overlay" aria-hidden="true">
+    <div class="result-card">
+      <div class="result-sparkles">✦ ♠ ✦ ♥ ✦</div>
+      <div id="resultKicker" class="result-kicker">本局结算</div>
+      <h2 id="resultTitle">漂亮！</h2>
+      <p id="resultText"></p>
+      <button id="closeResultBtn" class="primary">继续看牌桌</button>
+    </div>
+  </div>
+
+  <dialog id="lobbyDialog" class="lobby-dialog">
+    <div class="dialog-head lobby-titlebar">
+      <div><h2>联机大厅</h2><p>自选座位 · 替补观战 · 房间准备 · 断线重连</p></div>
+      <button id="closeLobbyBtn">×</button>
+    </div>
+    <div class="lobby-body">
+      <div class="network-switch" role="tablist" aria-label="联机方式">
+        <button class="network-tab active" data-network="lan">局域网</button>
+        <button class="network-tab" data-network="public">公网</button>
+      </div>
+
+      <section class="identity-row">
+        <label>联机昵称
+          <div class="input-with-action"><input id="playerNameInput" maxlength="12" /><button id="randomNameBtn">换一个</button></div>
+        </label>
+        <div class="identity-tip">推荐昵称取自《凡人修仙传》角色名；也可自由修改。</div>
+      </section>
+
+      <div id="lanNetworkPanel" class="network-panel active">
+        <div class="lobby-grid compact-grid">
+          <section class="lobby-card">
+            <h3>创建局域网房间</h3>
+            <div class="form-row"><label>房间名称<input id="roomNameInput" value="我的掼蛋房间" maxlength="24" /></label><label class="port-label">端口<input id="portInput" type="number" value="37821" /></label></div>
+            <button class="primary" id="hostLanBtn">创建房间并生成房间码</button>
+            <div id="hostInfo" class="info-box">同一 Wi-Fi / 路由器下，朋友只需输入房间码。</div>
+          </section>
+          <section class="lobby-card">
+            <h3>输入房间码加入</h3>
+            <div class="room-code-join"><input id="lanRoomCodeInput" maxlength="20" placeholder="例如 L2XG-Z51S-P4B1-I4ID" /><button class="primary" id="joinLanCodeBtn">加入房间</button></div>
+            <h4>附近房间（可直接填入房间码）</h4>
+            <div id="discoveredRooms" class="rooms-list"><span class="muted">正在搜索同一局域网中的房间…</span></div>
+          </section>
+        </div>
+      </div>
+
+      <div id="publicNetworkPanel" class="network-panel">
+        <div class="lobby-grid compact-grid">
+          <section class="lobby-card">
+            <h3>用这台电脑创建公网房间</h3>
+            <div class="form-row"><label>房间名称<input id="publicRoomNameInput" value="我的公网掼蛋房间" maxlength="24" /></label><label class="port-label">端口<input id="publicPortInput" type="number" value="37821" /></label></div>
+            <details class="advanced-net"><summary>高级设置</summary><label>公网 IPv4（一般留空自动识别）<input id="publicIpInput" placeholder="可留空" /></label></details>
+            <button class="primary" id="hostPublicBtn">创建房间并生成房间码</button>
+            <div id="publicHostInfo" class="info-box">朋友不需要输入 IP 或域名，只输入房间码。家庭宽带需允许 TCP 端口直连。</div>
+          </section>
+          <section class="lobby-card">
+            <h3>输入公网房间码加入</h3>
+            <div class="room-code-join"><input id="publicRoomCodeInput" maxlength="20" placeholder="例如 P3AB-CDEF-2XYZ-7QRT" /><button class="primary" id="joinPublicCodeBtn">加入房间</button></div>
+            <p class="muted">公网房间码会自动解析到房主电脑，不需要再填写服务器地址或域名。</p>
+          </section>
+        </div>
+      </div>
+
+      <section class="room-stage">
+        <div class="room-stage-head">
+          <div><span class="eyebrow">PLAY WITH FRIENDS</span><h3 id="lobbyRoomTitle">在这里，等你入座</h3><div class="room-code-line">房间码 <b id="lobbyRoomCode" title="点击复制房间码">------</b><small>点击房间码复制</small></div></div>
+          <div class="room-status-stack"><span id="lobbyNetworkBadge" class="mode-badge">局域网</span><span id="lobbyReadyBadge" class="mode-badge pale">未连接</span></div>
+        </div>
+
+        <div class="seat-picker" id="seatPicker">
+          <button class="lobby-seat team-green" data-lobby-seat="0"><span>1 号位 · 绿队</span><b>＋ 点击入座</b><small>空位</small></button>
+          <button class="lobby-seat team-blue" data-lobby-seat="1"><span>2 号位 · 蓝队</span><b>＋ 点击入座</b><small>空位</small></button>
+          <button class="lobby-seat team-green" data-lobby-seat="2"><span>3 号位 · 绿队</span><b>＋ 点击入座</b><small>空位</small></button>
+          <button class="lobby-seat team-blue" data-lobby-seat="3"><span>4 号位 · 蓝队</span><b>＋ 点击入座</b><small>空位</small></button>
+        </div>
+        <p class="seat-note">1 与 3 号位为搭档，2 与 4 号位为搭档。开局前可以换座；对局中空位可由替补补位。</p>
+
+        <div class="bench-row">
+          <div><h4>替补席 / 观战席</h4><p>最多 2 人。替补可以观战；有人退出时，可点击空座位补上。</p></div>
+          <div id="benchList" class="bench-list"><span class="muted">暂无替补</span></div>
+          <button id="toBenchBtn">去替补席</button>
+        </div>
+
+        <div class="room-actions">
+          <div id="roomState" class="muted">尚未连接</div>
+          <div class="room-action-buttons">
+            <button id="reconnectBtn" class="ghost hidden">断线重连</button>
+            <button id="leaveRoomBtn" class="danger-soft">退出房间</button>
+            <button id="readyBtn">准备</button>
+            <label class="level-inline">起始级牌<select id="levelRankSelect"></select></label>
+            <button id="restartOnlineBtn" class="warning-soft">重新开局</button>
+            <button class="primary" id="startOnlineBtn">房主开始</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </dialog>
+
+  <dialog id="rulesDialog">
+    <div class="dialog-head"><h2>玩法说明</h2><button id="closeRulesBtn">×</button></div>
+    <div class="rules-text">
+      <p><b>基本：</b>使用两副扑克牌，四人两两组队。级牌大于 A、小于小王；红桃级牌为“逢人配”，可参与普通牌型组合，但不能替代大小王。</p>
+      <p><b>牌型：</b>支持单张、对子、三张、三带二、顺子、三连对、钢板、同花顺、四至八张炸弹、四王炸。炸弹顺序：四炸 ＜ 五炸 ＜ 同花顺 ＜ 六炸 ＜ 七炸 ＜ 八炸 ＜ 四王炸。</p>
+      <p><b>名次与升级：</b>按出完顺序依次为头游、二游、三游、末游。头游搭档为二游升 3 级；搭档为三游升 2 级；搭档为末游升 1 级。</p>
+      <p><b>贡还牌：</b>末游/双下方按规则进贡，受贡方还一张 10 或以下合法牌；满足大王条件可抗贡。</p>
+      <p><b>接风：</b>某玩家最后一手出完且其他人均不要，由其对家接风领出。</p>
+      <p><b>联机：</b>局域网和公网都采用“房主建房 → 生成房间码 → 其他玩家输入房间码”的方式。公网模式由房主电脑直接作为服务器；家庭网络可能需要路由器端口映射。四个牌位之外另有 2 个替补/观战位，支持准备、重新开局、退出房间、房主踢人、掉线重连及空位补位。</p>
+      <p><b>快捷操作：</b>手牌支持一键摆牌、自动/手动排序；右键单张可直接尝试出牌，已选中多张时右键任意选中牌可直接出牌。</p>
+      <p><b>AI：</b>六档难度均离线运行。专业/地狱加入记牌统计、牌权控制、队友送牌与残局推演；“地狱”不会读取其他玩家暗牌。</p>
+    </div>
+  </dialog>
+
+  <script src="shared/game-core.js"></script>
+  <script src="shared/ai.js"></script>
+  <script src="shared/network-code.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

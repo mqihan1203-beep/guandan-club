@@ -1,0 +1,62 @@
+{
+  "name": "guandan-club-desktop",
+  "version": "2.3.0",
+  "description": "掼蛋俱乐部 - Windows桌面版 / 房间码局域网与公网直连 / 自选座位替补观战 / 聊天重连 / 一键摆牌与右键出牌 / 六档离线AI",
+  "main": "electron/main.js",
+  "author": "Guandan Club",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "server": "node server/standalone.js",
+    "build:win": "electron-builder --win nsis",
+    "pack:win": "electron-builder --win dir",
+    "test": "node tests/core.test.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.3"
+  },
+  "devDependencies": {
+    "electron": "^44.2.0",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.guandan.club",
+    "productName": "掼蛋俱乐部",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "server/**/*",
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "asarUnpack": [
+      "server/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "artifactName": "Guandan-Club-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "掼蛋俱乐部",
+      "installerLanguages": [
+        "zh_CN"
+      ],
+      "language": "2052"
+    }
+  }
+}
