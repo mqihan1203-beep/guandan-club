@@ -35,6 +35,6 @@ jobs:
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
-          name: Guandan-Club-Windows-2.2.0
-          path: guandan_desktop-2.2.0/dist/*.exe
+          name: Guandan-Club-Windows-2.3.0
+          path: guandan_desktop-2.3.0/dist/*.exe
           if-no-files-found: error
