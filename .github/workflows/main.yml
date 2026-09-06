@@ -12,7 +12,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: guandan_desktop-2.2.0
+        working-directory: guandan_desktop-2.3.0
 
     steps:
       - name: Checkout
